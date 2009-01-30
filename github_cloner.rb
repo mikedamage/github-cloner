@@ -2,11 +2,32 @@
 require 'sinatra'
 
 configure do
-	
+	enable :sessions
+	CONFIG = YAML.load_file("config/config.yml")
 end
 
 get '/' do
-	erb :index
+	if session["logged_in"] == "true"
+		erb :dashboard
+	else
+		redirect '/login'
+	end
+end
+
+get '/login' do
+	erb :login
+end
+
+post '/login' do
+	user = CONFIG[:admin][:user]
+	pass = CONFIG[:admin][:password]
+	if params[:user] == user && params[:pass] == pass
+		session["logged_in"] = "true"
+		redirect '/'
+	else
+		@message = "Login Failed"
+		erb :login
+	end
 end
 
 get '/test' do

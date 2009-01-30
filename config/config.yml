@@ -1,0 +1,6 @@
+:admin:
+  :user: mike
+  :password: k2130k
+cloning:
+  enabled: true
+  directory: "/home/mike/Development"
