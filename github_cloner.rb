@@ -2,32 +2,13 @@
 require 'sinatra'
 
 configure do
-	enable :sessions
-	CONFIG = YAML.load_file("config/config.yml")
+	CLONE_DIR = "/home/mike/Development"
+	LOGFILE = "log/cloner.log"
 end
 
 get '/' do
-	if session["logged_in"] == "true"
-		erb :dashboard
-	else
-		redirect '/login'
-	end
-end
-
-get '/login' do
-	erb :login
-end
-
-post '/login' do
-	user = CONFIG[:admin][:user]
-	pass = CONFIG[:admin][:password]
-	if params[:user] == user && params[:pass] == pass
-		session["logged_in"] = "true"
-		redirect '/'
-	else
-		@message = "Login Failed"
-		erb :login
-	end
+	@log = Pathname.new(LOGFILE).read
+	erb :index
 end
 
 get '/test' do
@@ -44,14 +25,14 @@ post '/raw_capture' do
 end
 
 post '/clone' do
+	log = Logger.new(LOGFILE, 'weekly')
 	push = JSON.parse(params[:payload])
+	repo_url = push["repository"]["url"].gsub(/^http\:\/\//, "git://")
+	
+	log.info "Received post-receive hook for repo: #{push["repository"]["name"]}"
+	
 end
 
-# = Sinatra Action: Sass Stylesheet Compressor/Renderer
-#
-# == Summary
-# Renders Sass stylesheets in the specified format.
-# Valid formats are: extended, expanded, compact, compressed
 get "/sass/:format/:file" do
 	content_type 'text/css', :charset => 'utf-8'
 	if params[:file] =~ /\.sass$/
