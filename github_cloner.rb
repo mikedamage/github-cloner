@@ -2,7 +2,7 @@
 require 'sinatra'
 
 configure do
-	CLONE_DIR = "/home/mike/Development"
+	CLONE_DIR = "/home/mike/Development/GithubClones"
 	LOGFILE = "log/cloner.log"
 end
 
