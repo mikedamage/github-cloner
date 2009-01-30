@@ -27,10 +27,21 @@ end
 post '/clone' do
 	log = Logger.new(LOGFILE, 'weekly')
 	push = JSON.parse(params[:payload])
+	repo_name = push["repository"]["name"]
 	repo_url = push["repository"]["url"].gsub(/^http\:\/\//, "git://")
+	local_clone = File.join(CLONE_DIR, repo_name)
+	log.info "Received post-receive hook for repo: #{repo_name}"
 	
-	log.info "Received post-receive hook for repo: #{push["repository"]["name"]}"
-	
+	if FileTest.exist?(local_clone)
+		log.info "Clone exists, pulling latest from Github..."
+		clone = Git.open(local_clone)
+		clone.chdir do
+			clone.pull('origin', 'master')
+		end
+	else
+		log.info "Cloning #{repo_url} to #{local_clone}"
+		clone = Git.clone(repo_url, local_clone)
+	end
 end
 
 get "/sass/:format/:file" do
